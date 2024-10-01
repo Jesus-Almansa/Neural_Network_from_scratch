@@ -15,7 +15,10 @@
      - [`tanh()` Method](#tanh-method)
      - [`backward()` Method](#backward-method)
 4. [Example of Backpropagation](#example-of-backpropagation)
-5. [Conclusion](#conclusion)
+5. [Example Notebook](#example-notebook)
+6. [Conclusion](#conclusion)
+
+
 
 ## Introduction
 
@@ -161,6 +164,12 @@ In this example:
 - We perform some arithmetic operations (`*` and `+`) with `a` and `b` to compute `f`.
 - After computing the forward pass, we call `f.backward()` to compute the gradients of `a` and `b` with respect to `f`.
 - The gradients are stored in `a.grad` and `b.grad`.
+
+```markdown
+## Example Notebook
+
+You can find an example of how backpropagation works in this [notebook](notebooks/Backpropagation.ipynb).
+```
 
 ## Conclusion
 
