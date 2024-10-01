@@ -165,11 +165,11 @@ In this example:
 - After computing the forward pass, we call `f.backward()` to compute the gradients of `a` and `b` with respect to `f`.
 - The gradients are stored in `a.grad` and `b.grad`.
 
-```markdown
+
 ## Example Notebook
 
-You can find an example of how backpropagation works in this [notebook](notebooks/Backpropagation.ipynb).
-```
+You can find an example of how backpropagation works in this [notebook](notebooks/Backpropagation.ipynb). All necessary funcionts are in [backpropagation-class](src/backpropagation.py) and [graph](src/graph_nn.py)
+
 
 ## Conclusion
 
