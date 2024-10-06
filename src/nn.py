@@ -13,17 +13,19 @@ class Neuron:
         return out
 
 class Layer:
-    def __init__(self, number_of_inputs, number_of_neurons):
-        self.neurons = [Neuron(number_of_inputs) for _ in range(number_of_neurons)]
+    def __init__(self, number_of_inputs_to_a_layer, number_of_neurons):
+        self.neurons = [Neuron(number_of_inputs_to_a_layer) for _ in range(number_of_neurons)]
 
     def __call__(self,x):
         outs = [n(x) for n in self.neurons]
         return outs[0] if len(outs) == 1 else outs
 
 class MLP:
-    def __init__(self, number_of_inputs, number_of_neurons_per_layer):
-        sz = [number_of_inputs] + number_of_neurons_per_layer
-        self.layers = [Layer(sz[i], sz[i+1]) for i in range(len(number_of_neurons_per_layer))]
+    def __init__(self, number_of_inputs, neurons_per_layer):
+        layer_size = [number_of_inputs] + neurons_per_layer
+        # mlp = MLP(3, [4, 4, 1])
+        #layer_size = [3] + [4, 4, 1]  # Resulting in sz = [3, 4, 4, 1]
+        self.layers = [Layer(layer_size[i], layer_size[i+1]) for i in range(len(neurons_per_layer))]
          
     def __call__(self, x):
         for layer in self.layers:
