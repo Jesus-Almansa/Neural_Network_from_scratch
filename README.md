@@ -168,7 +168,7 @@ In this example:
 
 ## Example Notebook
 
-You can find an example of how backpropagation works in this [notebook](notebooks/Backpropagation.ipynb). All necessary funcionts are in [backpropagation-class](src/backpropagation.py) and [graph](src/graph_nn.py)
+You can find an example of how backpropagation and loss function works in this [notebook](notebooks/Backpropagation.ipynb). All necessary funcionts are in [backpropagation](src/backpropagation.py), [graph](src/graph_nn.py) and [neural network](src/nn.py)
 
 
 ## Conclusion
