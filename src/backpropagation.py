@@ -16,15 +16,17 @@ class Value:
         return f"Value(data={self.data})"
     
     def __add__(self, other):
+        other = other if isinstance(other, Value) else Value(other)
         out = Value(self.data + other.data, (self, other), '+')
 
         def _backward():
-            self.grad += 1 * out.grad
-            other.grad += 1 * out.grad
+            self.grad += 1.0 * out.grad
+            other.grad += 1.0 * out.grad
         out._backward = _backward
         return out 
     
     def __mul__(self, other):
+        other = other if isinstance(other, Value) else Value(other)
         out = Value(self.data * other.data, (self, other), '*')
 
         def _backward():
@@ -45,15 +47,15 @@ class Value:
         return out
 
     def backward(self):
-        self.grad = 1
+        self.grad = 1.0
         topo = []
         visited = set()
-        def build(v):
+        def build_topology(v):
             if v not in visited:
                 visited.add(v)
                 for child in v._prev:
-                    build(child)
+                    build_topology(child)
                 topo.append(v)
-        build(self)
+        build_topology(self)
         for v in reversed(topo):
             v._backward()
