@@ -2,6 +2,8 @@ import math
 def f(x):
     return 3*x**2 - 4*x + 5
 
+import math
+
 class Value:
 
     def __init__(self, data, _children=(), _op='', label=''):
@@ -16,7 +18,7 @@ class Value:
         return f"Value(data={self.data})"
     
     def __add__(self, other):
-        other = other if isinstance(other, Value) else Value(other)
+        other = other if isinstance(other, Value) else Value(other)  # Ensure other is a Value object
         out = Value(self.data + other.data, (self, other), '+')
 
         def _backward():
@@ -26,7 +28,7 @@ class Value:
         return out 
     
     def __sub__(self, other):
-        other = other if isinstance(other, Value) else Value(other)
+        other = other if isinstance(other, Value) else Value(other)  # Ensure other is a Value object
         out = Value(self.data - other.data, (self, other), '-')
 
         def _backward():
@@ -36,7 +38,7 @@ class Value:
         return out
     
     def __mul__(self, other):
-        other = other if isinstance(other, Value) else Value(other)
+        other = other if isinstance(other, Value) else Value(other)  # Ensure other is a Value object
         out = Value(self.data * other.data, (self, other), '*')
 
         def _backward():
@@ -45,21 +47,12 @@ class Value:
         out._backward = _backward
         return out 
     
-    # def __truediv__(self, other):
-    #     other = other if isinstance(other, Value) else Value(other)
-    #     out = Value(self.data / other.data, (self, other), '/')
-
-    #     def _backward():
-    #         self.grad += 1.0 / other.data * out.grad
-    #         other.grad -= self.data / other.data**2 * out.grad
-    #     out._backward = _backward
-    #     return out
-    
     def __pow__(self, other):
-        out = Value(self.data**other, (self, other), '**')
+        other = other if isinstance(other, Value) else Value(other)  # Ensure other is a Value object
+        out = Value(self.data**other.data, (self,), '**')
 
         def _backward():
-            self.grad += other * self.data**(other - 1) * out.grad
+            self.grad += other.data * self.data**(other.data - 1) * out.grad
         out._backward = _backward
         return out
     
@@ -88,6 +81,10 @@ class Value:
         build_topology(self)
         for v in reversed(topo):
             v._backward()
+
+# Other methods like neg, radd, etc. should follow the same pattern:
+# - Convert non-Value operands to Value
+
 
     def __neg__(self): # -self
         return self * -1
