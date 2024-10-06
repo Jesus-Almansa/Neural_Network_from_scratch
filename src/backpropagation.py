@@ -45,15 +45,15 @@ class Value:
         out._backward = _backward
         return out 
     
-    def __truediv__(self, other):
-        other = other if isinstance(other, Value) else Value(other)
-        out = Value(self.data / other.data, (self, other), '/')
+    # def __truediv__(self, other):
+    #     other = other if isinstance(other, Value) else Value(other)
+    #     out = Value(self.data / other.data, (self, other), '/')
 
-        def _backward():
-            self.grad += 1.0 / other.data * out.grad
-            other.grad -= self.data / other.data**2 * out.grad
-        out._backward = _backward
-        return out
+    #     def _backward():
+    #         self.grad += 1.0 / other.data * out.grad
+    #         other.grad -= self.data / other.data**2 * out.grad
+    #     out._backward = _backward
+    #     return out
     
     def __pow__(self, other):
         out = Value(self.data**other, (self, other), '**')
@@ -88,3 +88,24 @@ class Value:
         build_topology(self)
         for v in reversed(topo):
             v._backward()
+
+    def __neg__(self): # -self
+        return self * -1
+
+    def __radd__(self, other): # other + self
+        return self + other
+
+    def __sub__(self, other): # self - other
+        return self + (-other)
+
+    def __rsub__(self, other): # other - self
+        return other + (-self)
+
+    def __rmul__(self, other): # other * self
+        return self * other
+
+    def __truediv__(self, other): # self / other
+        return self * other**-1
+
+    def __rtruediv__(self, other): # other / self
+        return other * self**-1
