@@ -25,6 +25,16 @@ class Value:
         out._backward = _backward
         return out 
     
+    def __sub__(self, other):
+        other = other if isinstance(other, Value) else Value(other)
+        out = Value(self.data - other.data, (self, other), '-')
+
+        def _backward():
+            self.grad += 1.0 * out.grad
+            other.grad -= 1.0 * out.grad
+        out._backward = _backward
+        return out
+    
     def __mul__(self, other):
         other = other if isinstance(other, Value) else Value(other)
         out = Value(self.data * other.data, (self, other), '*')
@@ -34,6 +44,24 @@ class Value:
             other.grad += self.data * out.grad
         out._backward = _backward
         return out 
+    
+    def __truediv__(self, other):
+        other = other if isinstance(other, Value) else Value(other)
+        out = Value(self.data / other.data, (self, other), '/')
+
+        def _backward():
+            self.grad += 1.0 / other.data * out.grad
+            other.grad -= self.data / other.data**2 * out.grad
+        out._backward = _backward
+        return out
+    
+    def __pow__(self, other):
+        out = Value(self.data**other, (self, other), '**')
+
+        def _backward():
+            self.grad += other * self.data**(other - 1) * out.grad
+        out._backward = _backward
+        return out
     
     def tanh(self):
         x = self.data
@@ -56,6 +84,7 @@ class Value:
                 for child in v._prev:
                     build_topology(child)
                 topo.append(v)
+
         build_topology(self)
         for v in reversed(topo):
             v._backward()
