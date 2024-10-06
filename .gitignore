@@ -1,3 +1,4 @@
 # Add files or directories to ignore for version control
 src/__pycache__/
 your_project_name.egg-info/
+*.txt
