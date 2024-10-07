@@ -1,179 +1,93 @@
-# Backpropagation
+# Neural Network from Scratch: Manual, Graph-based, and PyTorch Implementations
 
-## Index
+This repository demonstrates how to build a neural network from scratch with multiple approaches for backpropagation, including:
+1. **Manual Backpropagation**: Implementing backpropagation by calculating gradients manually.
+2. **Graph-based Neural Networks**: Using a computational graph approach to track operations and perform backpropagation.
+3. **PyTorch Approach**: Leveraging PyTorch's autograd and `nn.Module` for a more efficient and scalable implementation.
 
-1. [Introduction](#introduction)
-2. [Backpropagation Overview](#backpropagation-overview)
-   - [Forward Pass](#forward-pass)
-   - [Backward Pass](#backward-pass)
-   - [Chain Rule of Calculus](#chain-rule-of-calculus)
-3. [The `Value` Class](#the-value-class)
-   - [Attributes](#attributes)
-   - [Methods](#methods)
-     - [`__add__` Method](#add-method)
-     - [`__mul__` Method](#mul-method)
-     - [`tanh()` Method](#tanh-method)
-     - [`backward()` Method](#backward-method)
-4. [Example of Backpropagation](#example-of-backpropagation)
-5. [Example Notebook](#example-notebook)
-6. [Conclusion](#conclusion)
-
-
+## Table of Contents
+- [Introduction](#introduction)
+- [Installation](#installation)
+- [Project Structure](#project-structure)
+- [Usage](#usage)
+- [Manual Backpropagation](#manual-backpropagation)
+- [Graph-based Neural Networks](#graph-based-neural-networks)
+- [PyTorch Approach](#pytorch-approach)
+- [Contributing](#contributing)
+- [License](#license)
 
 ## Introduction
 
-Backpropagation is a key algorithm in machine learning, especially in the context of training deep neural networks. It allows for efficient computation of gradients of the loss function with respect to the parameters of the model using the chain rule. These gradients are used by optimization algorithms like gradient descent to update the model parameters, helping the model minimize the loss function.
+This project is designed to provide an in-depth understanding of how neural networks work by building them from the ground up. Starting with manual backpropagation, moving to a graph-based approach for better visualization and debugging, and concluding with PyTorch's native tools, you'll gain insights into different methods of implementing backpropagation and model optimization.
 
-In this `README`, we will explore how backpropagation works and explain the custom implementation of backpropagation through the `Value` class.
+The three key implementations covered in this project:
+- **Manual Backpropagation**: Hand-derived gradients for each layer.
+- **Graph-based Approach**: Using a computational graph to automatically track operations and calculate gradients.
+- **PyTorch**: Building models using PyTorch, with its built-in automatic differentiation and neural network modules.
 
-## Backpropagation Overview
+## Installation
 
-Backpropagation involves two key phases:
-1. **Forward Pass**: In the forward pass, the input data is passed through the network, and computations are performed layer by layer to generate the output (prediction).
-2. **Backward Pass**: After the forward pass, the backward pass computes the gradients of the loss function with respect to the model's parameters. This is done by applying the chain rule of calculus to propagate errors from the output layer back to each parameter, allowing us to adjust them accordingly.
+1. Clone the repository and navigate to the project folder.
+   
+   ```bash
+   git clone https://github.com/your_username/neural-network-from-scratch.git
+   cd neural-network-from-scratch
+   ```
 
-### Chain Rule of Calculus
+2. Install the required dependencies.
 
-The chain rule is essential to backpropagation, as it provides a way to compute the derivative of composite functions. If we have a function `f(g(x))`, the chain rule tells us that the derivative of `f` with respect to `x` is:
+   ```bash
+   pip install -r dependencies.txt
+   ```
 
-\[
-\frac{df}{dx} = \frac{df}{dg} \cdot \frac{dg}{dx}
-\]
+Dependencies include:
+- NumPy
+- PyTorch (for the PyTorch approach)
 
-This principle is applied in backpropagation to compute the gradients as we move from the output layer back to the input.
+## Project Structure
 
----
-
-## The `Value` Class
-
-The `Value` class provided below is a simple custom implementation that simulates backpropagation for scalar values. It supports operations like addition, multiplication, and hyperbolic tangent (`tanh`), and it tracks how values are computed to enable backpropagation.
-
-```python
-import math
-
-def f(x):
-    return 3*x**2 - 4*x + 5
-
-class Value:
-    def __init__(self, data, _children=(), _op='', label=''):
-        self.data = data
-        self.grad = 0.0
-        self._backward = lambda: None
-        self._prev = set(_children)
-        self._op = _op
-        self.label = label
-
-    def __repr__(self):
-        return f"Value(data={self.data})"
-    
-    def __add__(self, other):
-        out = Value(self.data + other.data, (self, other), '+')
-
-        def _backward():
-            self.grad += 1 * out.grad
-            other.grad += 1 * out.grad
-        out._backward = _backward
-        return out 
-    
-    def __mul__(self, other):
-        out = Value(self.data * other.data, (self, other), '*')
-
-        def _backward():
-            self.grad += other.data * out.grad
-            other.grad += self.data * out.grad
-        out._backward = _backward
-        return out 
-    
-    def tanh(self):
-        x = self.data
-        t = (math.exp(2 * x) - 1) / (math.exp(2 * x) + 1)
-        out = Value(t, (self,), 'tanh')
-
-        def _backward():
-            self.grad += (1 - t**2) * out.grad
-
-        out._backward = _backward
-        return out
-
-    def backward(self):
-        self.grad = 1
-        topo = []
-        visited = set()
-        def build(v):
-            if v not in visited:
-                visited.add(v)
-                for child in v._prev:
-                    build(child)
-                topo.append(v)
-        build(self)
-        for v in reversed(topo):
-            v._backward()
+```plaintext
+neural-network-from-scratch/
+│
+├── Notebooks/
+│   └── Backpropagation.ipynb    # Jupyter Notebook with explanations and code examples for backpropagation
+│
+├── src/
+│   ├── __init__.py              # Init file for the src package
+│   ├── backpropagation.py       # Implementation of manual backpropagation
+│   ├── graph_nn.py              # Graph-based neural network with automatic backpropagation
+│   ├── nn.py                    # PyTorch-based neural network implementation
+│
+├── .gitignore                   # Git ignore file
+├── dependencies.txt             # List of dependencies
+├── README.md                    # Project documentation (this file)
+├── setup.py                     # Setup configuration for packaging
+└── your_project_name.egg-info/   # Metadata for the package (automatically generated)
 ```
 
-### Key Components of the `Value` Class
+### Key Files:
+- `backpropagation.py`: Implements neural networks with manual backpropagation.
+- `graph_nn.py`: Neural network implementation using a computational graph to track operations and backpropagation automatically.
+- `nn.py`: Manual implementation of Neuron, Layer and MLP & PyTorch-based implementation for creating and training neural networks using PyTorch’s `nn.Module`.
+- `Backpropagation.ipynb`: Jupyter Notebook with examples and code walkthrough for backpropagation methods.
 
-1. **Attributes**:
-   - `data`: The scalar value stored in the `Value` object.
-   - `grad`: The gradient associated with this `Value`. This will be used during backpropagation.
-   - `_backward`: A function that computes the local gradients and accumulates them during backpropagation.
-   - `_prev`: A set of `Value` objects that are parents (i.e., used in the computation of this `Value`).
-   - `_op`: The operation (`+`, `*`, `tanh`, etc.) that was used to create this `Value`.
-   - `label`: A string to label the `Value` (useful for visualization).
+## Manual Backpropagation
 
-2. **`__add__` Method**:
-   - This method overloads the `+` operator, allowing for addition of two `Value` objects. 
-   - It also defines the `_backward()` function, which computes how the gradients propagate through an addition operation during backpropagation.
+The `backpropagation.py` file implements a fully connected neural network with manual backpropagation. This approach involves:
+- Explicitly calculating the gradients for each layer.
+- Updating weights using gradient descent.
 
-3. **`__mul__` Method**:
-   - This method overloads the `*` operator for multiplying two `Value` objects.
-   - It defines the `_backward()` function to handle the propagation of gradients through a multiplication operation.
+This method is crucial for understanding how gradients are propagated back through the network.
 
-4. **`tanh()` Method**:
-   - This method implements the hyperbolic tangent (`tanh`) function. The `tanh` function is commonly used in neural networks as an activation function.
-   - It also defines the `_backward()` function for computing gradients through the `tanh` operation.
+## Graph-based Neural Networks
 
-5. **`backward()` Method**:
-   - This is the core of backpropagation. It starts from the output node and propagates the gradients backward through the computational graph.
-   - It builds the topological order of the computational graph using a recursive depth-first search (`build()` function) and then applies backpropagation in reverse order.
+The `graph_nn.py` file introduces the concept of a computational graph. Each operation is tracked in the graph, and backpropagation is performed automatically by traversing this graph. This makes debugging easier and helps visualize the flow of gradients across layers.
 
-### Example of Backpropagation
+## PyTorch Approach
 
-Let's create an example of forward and backward passes using this class:
+The `nn.py` file leverages PyTorch’s `nn.Module` and autograd functionalities to build, train, and evaluate a neural network. PyTorch handles the computation graph and gradient calculations internally, making this the most efficient and scalable approach of the three.
 
-```python
-a = Value(-2.0, label='a')
-b = Value(3.0, label='b')
-
-# Forward pass
-d = a * b
-d.label = 'd'
-e = a + b
-e.label = 'e'
-f = d * e
-f.label = 'f'
-
-# Backward pass
-f.backward()
-
-# Print the gradients
-print(a.grad)  # Gradient of 'a'
-print(b.grad)  # Gradient of 'b'
-```
-
-In this example:
-- We perform some arithmetic operations (`*` and `+`) with `a` and `b` to compute `f`.
-- After computing the forward pass, we call `f.backward()` to compute the gradients of `a` and `b` with respect to `f`.
-- The gradients are stored in `a.grad` and `b.grad`.
-
-
-## Example Notebook
-
-You can find an example of how backpropagation and loss function works in this [notebook](notebooks/Backpropagation.ipynb). All necessary funcionts are in [backpropagation](src/backpropagation.py), [graph](src/graph_nn.py) and [neural network](src/nn.py)
-
-
-## Conclusion
-
-This implementation of backpropagation using a custom `Value` class illustrates the core principles of how deep learning frameworks like PyTorch and TensorFlow compute gradients. By defining the forward operations and manually implementing the chain rule in the `_backward()` functions, you gain a deeper understanding of how these frameworks work under the hood.
-
-This class provides a simple yet powerful mechanism to experiment with backpropagation on scalar values, and it can be extended to handle more complex functions and multi-dimensional data.
-
+### Key Features:
+- Automatic differentiation with autograd.
+- Efficient forward and backward passes.
+- Support for GPU acceleration (if available).
